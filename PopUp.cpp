@@ -83,12 +83,14 @@ std::optional<std::wstring> GetErrorStr(DWORD dwError)
         NULL
     );
 
-    if (fOk && (hlocal != NULL)) {
+    if (fOk && (hlocal != NULL))
+    {
         std::wstring ret((PCTSTR)LocalLock(hlocal));
         LocalFree(hlocal);
         return ret;
     }
-    else {
+    else
+    {
         return std::nullopt;
     }
 }
