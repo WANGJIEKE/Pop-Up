@@ -8,6 +8,8 @@
 #include <future>
 #include <iostream>
 #include <random>
+#include <string>
+#include <sstream>
 #include <thread>
 #include <vector>
 
@@ -24,7 +26,8 @@ static std::vector<MessageBoxParam> msgBoxTemplates
     {L"Close Me", L"LOL", MB_OK | MB_ICONINFORMATION},
     {L"You can't close me", L"!", MB_OK | MB_ICONINFORMATION},
     {L"Hahahaha", L"Haha", MB_OK | MB_ICONINFORMATION},
-    {L"_(:3」∠)_", L"Oops!", MB_OK | MB_ICONERROR}
+    {L"_(:3」∠)_", L"Oops!", MB_OK | MB_ICONERROR},
+    {L"You are weak. Aren't you?", L"XDDDD", MB_OK | MB_ICONQUESTION }
 };
 
 static std::vector<std::future<int>> futures;
@@ -32,9 +35,9 @@ static int maxMsgBox;
 
 int MessageBoxWithRandomContent()
 {
-    std::random_device rand;
-    std::default_random_engine engine(rand());
-    std::uniform_int_distribution dist(0ULL, msgBoxTemplates.size() - 1);
+    static std::random_device rand;
+    static std::default_random_engine engine(rand());
+    static std::uniform_int_distribution dist(0ULL, msgBoxTemplates.size() - 1);
     const MessageBoxParam& param = msgBoxTemplates[dist(engine)];
     return MessageBoxRandPos(NULL, param.text.c_str(), param.caption.c_str(), param.type);
 }

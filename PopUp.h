@@ -16,6 +16,6 @@ static void CALLBACK WinEventProc(
     DWORD dwmsEventTime
 );
 
-int MessageBoxRandPos(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
+int MessageBoxRandPos(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
 
 std::optional<std::wstring> GetErrorStr(DWORD dwLastError);
