@@ -6,15 +6,15 @@
 
 std::tuple<int, int> GetRandomPos()
 {
-    static int width = GetSystemMetrics(SM_CXFULLSCREEN);
-    static int height = GetSystemMetrics(SM_CYFULLSCREEN);
+    int width = GetSystemMetrics(SM_CXFULLSCREEN);
+    int height = GetSystemMetrics(SM_CYFULLSCREEN);
 
-    static std::random_device rand;
-    static std::default_random_engine xGenerator(rand()), yGenerator(rand());
+    std::random_device rand;
+    std::default_random_engine xGenerator(rand()), yGenerator(rand());
 
     // leave space between the message box and the border
-    static std::uniform_int_distribution xDistribution(200, width - 200);
-    static std::uniform_int_distribution yDistribution(90, height - 90);
+    std::uniform_int_distribution xDistribution(200, width - 200);
+    std::uniform_int_distribution yDistribution(90, height - 120);
 
     return { xDistribution(xGenerator), yDistribution(yGenerator) };
 }
@@ -31,7 +31,7 @@ static void CALLBACK WinEventProc(
 {
     int x, y;
     std::tie(x, y) = GetRandomPos();
-    SetWindowPos(hWnd, NULL, x, y, 0, 0, SWP_NOSIZE);
+    SetWindowPos(hWnd, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
 }
 
 int MessageBoxRandPos(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType)

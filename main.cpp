@@ -24,7 +24,7 @@ struct MessageBoxParam
 static std::vector<MessageBoxParam> msgBoxTemplates
 {
     {L"Close Me", L"LOL", MB_OK | MB_ICONINFORMATION},
-    {L"You can't close me", L"!", MB_OK | MB_ICONINFORMATION},
+    {L"You can't close me", L"!", MB_OK | MB_ICONWARNING},
     {L"Hahahaha", L"Haha", MB_OK | MB_ICONINFORMATION},
     {L"_(:3」∠)_", L"Oops!", MB_OK | MB_ICONERROR},
     {L"You are weak. Aren't you?", L"XDDDD", MB_OK | MB_ICONQUESTION }
@@ -32,6 +32,12 @@ static std::vector<MessageBoxParam> msgBoxTemplates
 
 static std::vector<std::future<int>> futures;
 static int maxMsgBox;
+
+template<typename T> inline
+T myMax(const T& a, const T& b)
+{
+    return a >= b ? a : b;
+}
 
 int MessageBoxWithRandomContent()
 {
@@ -42,7 +48,8 @@ int MessageBoxWithRandomContent()
     return MessageBoxRandPos(NULL, param.text.c_str(), param.caption.c_str(), param.type);
 }
 
-void mainLoop(int spawnIntervalMiliSecond)
+[[noreturn]]
+void mainLoop(int spawnIntervalMiliSecond, int initialMsgBox)
 {
     using namespace std::chrono;
     using namespace std::chrono_literals;
@@ -50,6 +57,8 @@ void mainLoop(int spawnIntervalMiliSecond)
     constexpr milliseconds tickLen(1000 / tickPerSecond);
     milliseconds spawnInterval(spawnIntervalMiliSecond);
     milliseconds messageBoxSpawnStart = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+    milliseconds checkPoint = messageBoxSpawnStart;
+    int counter = initialMsgBox;
 
     while (true)
     {
@@ -57,7 +66,12 @@ void mainLoop(int spawnIntervalMiliSecond)
 
         if (futures.size() == maxMsgBox)
         {
-            std::cout << "You lose because the maximum message box number has been reached" << std::endl;
+            std::wstringstream ss;
+            ss << "The maximum message box number has been reached, GAME OVER." << std::endl;
+            ss << "You have close " << myMax(counter - maxMsgBox, 0) << " windows!";
+            std::wcout << ss.str() << std::endl;
+            HWND hCmd = GetConsoleWindow();
+            ShowWindow(hCmd, SW_RESTORE);
             std::cout << "Press enter to exit..." << std::flush;
             std::getchar();
             std::quick_exit(0);
@@ -71,20 +85,20 @@ void mainLoop(int spawnIntervalMiliSecond)
             ),
             futures.end()
         );
-        if (futures.empty())
-        {
-            std::cout << "You win because you just close all message boxes before a new one is generated" << std::endl;
-            std::cout << "Press enter to exit..." << std::flush;
-            std::getchar();
-            return;
-        }
 
         if (duration_cast<milliseconds>(system_clock::now().time_since_epoch()) - messageBoxSpawnStart >= spawnInterval)
         {
             futures.push_back(
-                std::async(std::launch::async, MessageBoxWithRandomContent)
+                std::async(std::launch::async, []() { return MessageBoxWithRandomContent(); })
             );
             messageBoxSpawnStart = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+            counter += 1;
+        }
+
+        if (duration_cast<milliseconds>(system_clock::now().time_since_epoch()) - checkPoint >= 500ms && spawnInterval > 0ms)
+        {
+            spawnInterval -= 10ms;
+            checkPoint = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
         }
 
         std::this_thread::sleep_for(
@@ -93,11 +107,19 @@ void mainLoop(int spawnIntervalMiliSecond)
     }
 }
 
+[[noreturn]]
 int main()
 {
     int initialMsgBox = 3;
     int spawnInterval = 1000;
-    maxMsgBox = 20;
+    maxMsgBox = 30;
+
+    std::cout << "Close these messagebox as many as possible before they got out of control!" << std::endl;
+    std::cout << "Press enter key to start..." << std::flush;
+    std::getchar();
+
+    HWND hCmd = GetConsoleWindow();
+    ShowWindow(hCmd, SW_MINIMIZE);
 
     for (int i = 0; i < initialMsgBox; ++i)
     {
@@ -105,6 +127,5 @@ int main()
             std::async(std::launch::async, MessageBoxWithRandomContent)
         );
     }
-    mainLoop(spawnInterval);
-    return 0;
+    mainLoop(spawnInterval, initialMsgBox);
 }
