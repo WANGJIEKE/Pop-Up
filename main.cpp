@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -54,7 +55,9 @@ void mainLoop(int spawnIntervalMiliSecond)
         if (futures.size() == maxMsgBox)
         {
             std::cout << "You lose because the maximum message box number has been reached" << std::endl;
-            return;
+            std::cout << "Press any key to exit..." << std::flush;
+            std::getchar();
+            std::quick_exit(0);
         }
 
         futures.erase(
@@ -68,6 +71,8 @@ void mainLoop(int spawnIntervalMiliSecond)
         if (futures.empty())
         {
             std::cout << "You win because you just close all message boxes before a new one is generated" << std::endl;
+            std::cout << "Press any key to exit..." << std::flush;
+            std::getchar();
             return;
         }
 
@@ -91,7 +96,7 @@ int main()
 {
     int initialMsgBox = 3;
     int spawnInterval = 1500;
-    maxMsgBox = 20;
+    maxMsgBox = 5;
 
     for (int i = 0; i < initialMsgBox; ++i)
     {
