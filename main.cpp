@@ -38,13 +38,13 @@ int MessageBoxWithRandomContent()
     return MessageBoxRandPos(NULL, param.text.c_str(), param.caption.c_str(), param.type);
 }
 
-void mainLoop()
+void mainLoop(int spawnIntervalMiliSecond)
 {
     using namespace std::chrono;
     using namespace std::chrono_literals;
     constexpr int tickPerSecond = 25;
     constexpr milliseconds tickLen(1000 / tickPerSecond);
-    constexpr milliseconds spawnInterval(1500);
+    milliseconds spawnInterval(spawnIntervalMiliSecond);
     milliseconds messageBoxSpawnStart = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
     while (true)
@@ -83,6 +83,7 @@ void mainLoop()
 int main()
 {
     int initialMsgBox = 3;
+    int spawnInterval = 1500;
     maxMsgBox = 20;
 
     for (int i = 0; i < initialMsgBox; ++i)
@@ -91,6 +92,6 @@ int main()
             std::async(std::launch::async, []() { return MessageBoxWithRandomContent(); })
         );
     }
-    mainLoop();
+    mainLoop(spawnInterval);
     return 0;
 }
