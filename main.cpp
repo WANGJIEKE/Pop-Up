@@ -57,7 +57,14 @@ void mainLoop(int spawnIntervalMiliSecond)
             return;
         }
 
-        futures.erase(std::remove_if(futures.begin(), futures.end(), [](const std::future<int>& future) { return future.wait_for(0ms) == std::future_status::ready; }), futures.end());
+        futures.erase(
+            std::remove_if(
+                futures.begin(),
+                futures.end(),
+                [](const std::future<int>& future) { return future.wait_for(0ms) == std::future_status::ready; }
+            ),
+            futures.end()
+        );
         if (futures.empty())
         {
             std::cout << "You win because you just close all message boxes before a new one is generated" << std::endl;
@@ -89,7 +96,7 @@ int main()
     for (int i = 0; i < initialMsgBox; ++i)
     {
         futures.push_back(
-            std::async(std::launch::async, []() { return MessageBoxWithRandomContent(); })
+            std::async(std::launch::async, MessageBoxWithRandomContent)
         );
     }
     mainLoop(spawnInterval);
